@@ -42,6 +42,7 @@ export const calculator = {
   },
 };
 
+// Returns statistical analysis for a numerical array
 export function analyze(arr) {
   if (!Array.isArray(arr)) {
     throw new Error(typeErrorTag`array${arr}`);
@@ -51,10 +52,100 @@ export function analyze(arr) {
     throw new Error("Array must have at least one item");
   }
 
+  let sum = 0;
+  const LENGTH = arr.length;
+
+  for (let idx = 0; idx < LENGTH; idx += 1) {
+    const currentElement = arr[idx];
+
+    if (typeof currentElement !== "number" || currentElement === NaN) {
+      const errMsg = `Invalid element ${currentElement} at [${idx}]: All elements must be numbers`;
+      throw new Error(errMsg);
+    }
+
+    sum += currentElement;
+  }
+
   return {
-    average: arr.reduce((sum, curr) => sum + curr, 0) / arr.length,
+    average: sum / LENGTH,
     min: Math.min(...arr),
     max: Math.max(...arr),
-    length: arr.length,
+    length: LENGTH,
+  };
+}
+
+export function caesar(key) {
+  if (typeof key !== "number" || key === NaN) {
+    throw new Error(typeErrorTag`number${key}`);
+  }
+
+  function isValidEnglishCode(code) {
+    return 0 <= code && code <= 25;
+  }
+
+  function isLowerCase(ch) {
+    return "a" <= ch && ch <= "z";
+  }
+
+  function convertToEnglishCode(ch) {
+    const firstLetter = isLowerCase(ch) ? "a" : "A";
+    const englishCode = ch.charCodeAt(0) - firstLetter.charCodeAt(0);
+
+    return {
+      firstLetter,
+      englishCode: isValidEnglishCode(englishCode) ? englishCode : null,
+    };
+  }
+
+  function processChar({ ch, key, callback }) {
+    const { firstLetter, englishCode } = convertToEnglishCode(ch);
+
+    if (englishCode === null) {
+      return ch;
+    }
+
+    let processedEnglishCode = callback({ englishCode, key });
+
+    return String.fromCharCode(
+      processedEnglishCode + firstLetter.charCodeAt(0)
+    );
+  }
+
+  function processText({ text, key, callback }) {
+    return text
+      .split("")
+      .map((ch) => processChar({ ch, key, callback }))
+      .join("");
+  }
+
+  function encryptEnglishCode({ key, englishCode }) {
+    return (englishCode + key) % 26;
+  }
+
+  function decryptEnglishCode({ key, englishCode }) {
+    let decryptedEnglishCode = (englishCode - key) % 26;
+
+    if (decryptedEnglishCode < 0) {
+      return 26 + decryptedEnglishCode;
+    }
+
+    return decryptedEnglishCode;
+  }
+
+  return {
+    encipher(text) {
+      if (typeof text !== "string") {
+        throw new Error(typeErrorTag`string${text}`);
+      }
+
+      return processText({ text, key, callback: encryptEnglishCode });
+    },
+    decipher(text) {
+      if (typeof text !== "string") {
+        throw new Error(typeErrorTag`string${text}`);
+      }
+
+      return processText({ text, key, callback: decryptEnglishCode });
+    },
   };
 }

@@ -17,6 +17,10 @@ test("throws an error with an empty array", () => {
   expect(() => analyze([])).toThrow();
 });
 
+test("throws an error with a non-numerical array element", () => {
+  expect(() => analyze([1, 8, 6, null, 5, 9])).toThrow();
+});
+
 test("returns an object with analysis when given an array", () => {
   expect(analyze([0])).toEqual({
     average: 0,
