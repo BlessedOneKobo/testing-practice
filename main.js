@@ -112,6 +112,10 @@ export function caesar(key) {
   }
 
   function processText({ text, key, callback }) {
+    if (typeof text !== "string") {
+      throw new Error(typeErrorTag`string${text}`);
+    }
+
     return text
       .split("")
       .map((ch) => processChar({ ch, key, callback }))
@@ -134,17 +138,9 @@ export function caesar(key) {
 
   return {
     encipher(text) {
-      if (typeof text !== "string") {
-        throw new Error(typeErrorTag`string${text}`);
-      }
-
       return processText({ text, key, callback: encryptEnglishCode });
     },
     decipher(text) {
-      if (typeof text !== "string") {
-        throw new Error(typeErrorTag`string${text}`);
-      }
-
       return processText({ text, key, callback: decryptEnglishCode });
     },
   };
